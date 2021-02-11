@@ -26,13 +26,19 @@ db.find()
     }
 })
 })
-.post((req,res)=>{
-if(req.body.name || req.body.bio){
+.post( (req,res)=>{
+if(req.body.name && req.body.bio){
     const newUser=db.insert({
         name:req.body.name,
         bio:req.body.bio
     })
-  res.status(201).json(newUser)
+    db.find()
+  .then((result)=>{
+
+    res.status(201).json(result)
+
+  }) 
+
 
 }else{
     res.status(400).json({
@@ -45,22 +51,26 @@ if(req.body.name || req.body.bio){
 server.route('/api/users/:id')
 .get((req,res)=>{
 const id=req.params.id
-const user=db.findById(id)
-if(!user){
+db.findById(id)
+.then((result)=>{
+
+if(!result){
     res.status(404).json({
         msg:"User not found"
     })
 }else{
-res.json(user)
+    
+res.json(result)
     }
 
+})
 })
 .put((req,res)=>{
     const id = req.params.id
 	const user = db.findById(id)
-
-	if (user) {
-        if (!req.body.name ||!req.body.bio) {
+.then(resul=>{
+	if (resul) {
+        if (!req.body.name &&!req.body.bio) {
    
             res.status(400).json
             ({
@@ -68,27 +78,35 @@ res.json(user)
             })
         }
         else{
-		const updatedUser = db.update(id, {
+		db.update(id, {
             name: req.body.name,
             bio:req.body.bio
         })
-        
+        .then((result)=>{
 
-        res.json(updatedUser)
+            res.json(result)
+        })
+
+        
     }
         } else {
 		res.status(404).json({
 			message: "The user with the specified ID does not exist.",
 		})
             }
+        })
 
 
 })
 .delete((req,res)=>{
     const id = req.params.id
-	const user = db.findById(id)
+	db.findById(id)
+    .then((result)=>{
 
-	if (user) {
+
+    
+
+	if (result) {
 		db.remove(id)
 		
 		res.status(204).end()
@@ -97,6 +115,7 @@ res.json(user)
 			message: "The user with the specified ID does not exist.",
 		})
 	}
+})
 })
 
 
